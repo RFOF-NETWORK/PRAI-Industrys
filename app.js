@@ -1,4 +1,3 @@
-
 // START: @RFOF-NETWORK - Vollständige Dual-Explorer & Sharding-Engine (app.js)
 
 window.system = {
@@ -67,7 +66,9 @@ window.system = {
 };
 
 const cryptoEngine = {
-    bip39WordList: ["abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse",
+    // HIER EINFACH DEINE 2048 WORTE WIEDER EINFÜGEN
+    bip39WordList: [
+        "abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse",
     "access", "accident", "account", "accuse", "achieve", "acid", "acoustic", "acquire", "across", "act",
     "action", "actor", "actress", "actual", "adapt", "add", "addict", "address", "adjust", "admit",
     "adult", "advance", "advice", "aerobic", "affair", "afford", "afraid", "again", "age", "agent",
@@ -272,7 +273,8 @@ const cryptoEngine = {
     "wire", "wisdom", "wise", "wish", "witness", "wolf", "woman", "wonder", "wood", "wool",
     "word", "work", "world", "worry", "worth", "wrap", "wreck", "wrestle", "wrist", "write",
     "wrong", "yard", "year", "yellow", "you", "young", "youth", "zebra", "zero", "zone",
-    "zoo"],
+    "zoo"
+    ],
 
     sha256: async (text) => {
         const msgBuffer = new TextEncoder().encode(text);
@@ -297,7 +299,8 @@ const cryptoEngine = {
     deriveEncryptionKey: async (password, salt) => {
         const encoder = new TextEncoder();
         const baseKey = await crypto.subtle.importKey("raw", encoder.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
-        return await crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, baseKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);    },
+        return await crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, baseKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+    },
 
     encryptData: async (plaintext, password) => {
         const encoder = new TextEncoder();
@@ -356,6 +359,35 @@ const cryptoEngine = {
 document.addEventListener("DOMContentLoaded", () => {
     cryptoEngine.initDualChains();
 
+    // --- NEUE INTEGRIERTE AUTH MODAL SWITCH LOGIK ---
+    const toggleAuthBtn = document.getElementById('toggle-auth-mode');
+    if (toggleAuthBtn) {
+        toggleAuthBtn.addEventListener('click', function(e) {
+            e.preventDefault(); // Verhindert ungewolltes Neuladen der Seite
+            const title = document.getElementById('modal-title');
+            const btn = document.getElementById('submit-btn');
+            const helperText = document.getElementById('login-helper-text');
+            
+            // Sicherheitscheck: Sind die Elemente im HTML vorhanden?
+            if (title && btn && helperText) {
+                if (title.innerText === "Science X Login") {
+                    title.innerText = "Science X Sign up";
+                    btn.innerText = "Sign up";
+                    helperText.innerText = "Already a member?";
+                    this.innerText = "Sign in";
+                } else {
+                    title.innerText = "Science X Login";
+                    btn.innerText = "Sign in";
+                    helperText.innerText = "Not a member?";
+                    this.innerText = "Sign up";
+                }
+            } else {
+                console.warn("Einige Elemente für den Auth-Switch (modal-title, submit-btn, login-helper-text) fehlen im HTML!");
+            }
+        });
+    }
+    // --- ENDE AUTH MODAL SWITCH LOGIK ---
+
     const menuToggleBtn = document.getElementById("menu-toggle-btn");
     const menuCloseBtn = document.getElementById("menu-close-btn");
     const profileToggleBtn = document.getElementById("profile-toggle-btn");
@@ -385,7 +417,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const darkmodeToggle = document.getElementById("toggle-darkmode");
     if(darkmodeToggle) {
         darkmodeToggle.addEventListener("change", (e) => {
-
             document.body.style.backgroundColor = e.target.checked ? "#0f172a" : "#1e293b";
             window.system.log(`Dark Mode: ${e.target.checked ? 'Active' : 'Inactive'}`);
         });
