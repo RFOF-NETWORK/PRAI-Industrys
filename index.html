@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@RFOF-NETWORK - Science X Integration</title>
-    <script src="https://tailwindcss.com"></script>
+    <!-- Offizieller Tailwind v4 Browser CDN Verweis -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', sans-serif; }
         .glass { background: #1e293b; border: 1px solid #334155; border-radius: 12px; }
         .auth-btn { width: 100%; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-weight: 600; text-align: center; cursor: pointer; transition: 0.2s; }
-        .hidden { display: none; }
-        /* Custom scrollbar für das Terminal */
+        .hidden { display: none !important; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -19,7 +19,7 @@
 </head>
 <body class="p-4 md:p-8 relative min-h-screen">
 
-    <!-- Navigations-Trigger für das linke Dropdown-Menü -->
+    <!-- Navigations-Trigger -->
     <div class="max-w-md mx-auto mb-4 flex justify-between items-center">
         <button id="menu-toggle-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition">
             ☰ Menu
@@ -33,7 +33,7 @@
     <div id="app" class="max-w-md mx-auto relative z-10">
         <h1 class="text-2xl font-bold mb-6 text-blue-400">🦅 Golden Phoenix / Science X</h1>
         
-        <!-- Auth Modal UI (Science X Login-Schnittstelle) -->
+        <!-- Auth Modal UI -->
         <div id="account-modal" class="glass p-6 relative hidden">
             <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">×</button>
             <h2 class="text-xl mb-4 font-semibold text-center">Science X Account</h2>
@@ -64,7 +64,6 @@
                 <i class="fab fa-apple"></i> Sign in with Apple
             </button>
 
-            <!-- Web3 Krypto-Erweiterung für EVM & BTC (Telnet Ready) -->
             <div class="mt-4 pt-4 border-t border-slate-700 grid grid-cols-2 gap-2">
                 <button id="btn-wallet-evm" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">Connect EVM</button>
                 <button id="btn-wallet-btc" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white">BTC Telnet</button>
@@ -76,19 +75,17 @@
             </div>
         </div>
 
-        <!-- Dashboard Bereich (Wird nach system.auth() sichtbar) -->
+        <!-- Dashboard Bereich -->
         <div id="dashboard" class="hidden">
             <div class="glass p-6 mb-6">
                 <h3 class="text-lg font-bold text-orange-500 uppercase">Topic Settings</h3>
                 <p class="text-xs mb-4">Identify the news topics you want to see.</p>
-                <div id="topic-list" class="space-y-2">
-                    <!-- Topics werden via JS generiert -->
-                </div>
-                <button onclick="system.saveTopics()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 p-2 rounded font-bold transition">Save and exit</button>
+                <div id="topic-list" class="space-y-2"></div>
+                <button id="btn-save-topics" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 p-2 rounded font-bold transition">Save and exit</button>
             </div>
         </div>
 
-        <!-- Persistent Log Terminal (Sichtbar für den Local/Global Explorer Datenstrom) -->
+        <!-- Persistent Log Terminal -->
         <div class="glass p-4">
             <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-1">
                 <span class="text-xs font-bold text-slate-400 font-mono">📡 NODE_CHAIN_LOGGER</span>
@@ -100,22 +97,19 @@
         </div>
     </div>
 
-    <!-- LINKES NAVIGATIONS-DROPDOWN MENÜ (Exakt nach den Bildern 2-10 designt) -->
+    <!-- LINKES NAVIGATIONS-DROPDOWN MENÜ -->
     <div id="sidebar-menu" class="fixed inset-y-0 left-0 w-80 bg-slate-900 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 overflow-y-auto hidden">
         <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
             <span class="font-bold text-blue-400 font-mono text-sm">@RFOF-MENU</span>
             <button id="menu-close-btn" class="text-slate-400 hover:text-white text-2xl font-bold px-2">×</button>
         </div>
 
-        <!-- Suchleiste im Menü -->
         <div class="p-4 border-b border-slate-800">
             <input type="text" placeholder="Search" class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-sm text-slate-300 focus:outline-none focus:border-slate-700">
         </div>
 
-        <!-- Verschachtelte Kategorien -->
         <div class="p-2 space-y-1 text-sm">
-            
-            <!-- Nanotechnology (Bild 9) -->
+            <!-- Sektionen -->
             <div class="has-submenu cursor-pointer" data-target="sub-nanotech">
                 <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
                     <span>⚙️ Nanotechnology</span><span class="arrow">›</span>
@@ -128,7 +122,6 @@
                 <a href="#" class="block p-2 hover:text-white">Nanophysics</a>
             </div>
 
-            <!-- Physics (Bild 8) -->
             <div class="has-submenu cursor-pointer" data-target="sub-physics">
                 <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
                     <span>⚛️ Physics</span><span class="arrow">›</span>
@@ -145,7 +138,6 @@
                 <a href="#" class="block p-2 hover:text-white">Superconductivity</a>
             </div>
 
-            <!-- Astronomy & Space (Bild 7) -->
             <div class="has-submenu cursor-pointer" data-target="sub-astronomy">
                 <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
                     <span>🚀 Astronomy & Space</span><span class="arrow">›</span>
@@ -159,11 +151,6 @@
                 <a href="#" class="block p-2 hover:text-white">Space Exploration</a>
             </div>
 
-            <!-- Earth (Bild 6) -->
-            <div class="has-submenu cursor-pointer" data-target="sub-earth">
-                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
-
-            <!-- Earth (Bild 6) -->
             <div class="has-submenu cursor-pointer" data-target="sub-earth">
                 <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
                     <span>🌍 Earth</span><span class="arrow">›</span>
@@ -174,6 +161,7 @@
                 <a href="#" class="block p-2 hover:text-white">Earth Sciences</a>
                 <a href="#" class="block p-2 hover:text-white">Environment</a>
             </div>
+
 
             <!-- Chemistry (Bild 5) -->
             <div class="has-submenu cursor-pointer" data-target="sub-chemistry">
