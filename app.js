@@ -1,27 +1,34 @@
 
-// START: @RFOF-NETWORK - Vollständige Krypto-, Wallet- & Menü-Logik (app.js)
+// START: @RFOF-NETWORK - Vollständige Dual-Explorer & Sharding-Engine (app.js)
 
-// Global zugängliches Systemobjekt zur Vermeidung von Konflikten
 window.system = {
-    auth: () => {
+    auth: async () => {
+        const email = document.getElementById('email').value || "anonymous@phoenix.net";
+        const pass = document.getElementById('password').value || "no_pass_vault";
+        
+        const sessionHash = await cryptoEngine.generateFractalHash(email + pass);
+        localStorage.setItem("user_session_hash", sessionHash);
+        window.sessionStorage.setItem("active_vault_key", pass);
+
+        // Mine den LOGIN-Statusblock
+        await cryptoEngine.mineDualBlock("STATUS_LOGGEDIN", {
+            user: email,
+            authProof: sessionHash.substring(0, 16)
+        });
+
         document.getElementById('account-modal').classList.add('hidden');
         document.getElementById('dashboard').classList.remove('hidden');
         window.system.renderTopics();
-        window.system.log("User successfully signed in via Science X.");
     },
+
     renderTopics: () => {
         const topics = ["Nanotechnology", "Physics", "Astronomy & Space", "Earth", "Chemistry", "Biology"];
         const container = document.getElementById('topic-list');
-        if (!container) return;
-        container.innerHTML = ''; 
-        topics.forEach(t => {
-            container.innerHTML += `<div class="flex items-center gap-2"><input type="checkbox" checked class="accent-orange-500"> <span>${t}</span></div>`;
-        });
+        if(container) {
+            container.innerHTML = topics.map(t => `<div class="flex items-center gap-2"><input type="checkbox" checked class="accent-orange-500"> <span>${t}</span></div>`).join('');
+        }
     },
-    saveTopics: () => {
-        window.system.log("Topic Settings saved persistently.");
-        alert("Settings saved!");
-    },
+
     toggleMenu: (open) => {
         const menu = document.getElementById('sidebar-menu');
         const backdrop = document.getElementById('menu-backdrop');
@@ -37,32 +44,30 @@ window.system = {
             setTimeout(() => menu.classList.add('hidden'), 300);
         }
     },
-    log: (msg, isErr = false) => {
+
+    saveTopics: async () => {
+        await cryptoEngine.mineDualBlock("STATUS_TOPICS_LOCKED", { timestamp: Date.now() });
+        window.system.log("Zustand persistent auf der Blockchain verankert.");
+        alert("Zustand im Ledger gesichert!");
+    },
+
+    log: (msg, type = "INF", localHash = "N/A", globalHash = "N/A") => {
         const out = document.getElementById('chain-output');
-        const time = new Date().toLocaleTimeString();
-        const prefix = isErr ? `<span class='text-red-500'>[ERR]</span>` : `<span>[INF]</span>`;
-        
         if (out) {
-            out.innerHTML += `<br>${prefix} [${time}] ${msg}`;
+            const time = new Date().toLocaleTimeString();
+            const color = type === "ERR" ? "text-red-500" : type === "BLOCK" ? "text-amber-400" : "text-green-500";
+            out.innerHTML += `
+                <div class="${color} p-1 border-b border-slate-800/40 font-mono text-[10px]">
+                    [${time}] [${type}] ${msg}<br>
+                    <span class="text-slate-500 block text-[9px] pl-2">➔ L_HASH: ${localHash.substring(0,20)}... | G_HASH: ${globalHash.substring(0,20)}...</span>
+                </div>`;
             out.scrollTop = out.scrollHeight;
         }
-        console.log(`${isErr ? "🔴 [ERROR]" : "🟢 [INFO]"} [${new Date().toISOString()}] ${msg}`);
     }
 };
 
-document.addEventListener("DOMContentLoaded", () => {
-    const sidebarMenu = document.getElementById("sidebar-menu");
-    const accountModal = document.getElementById("account-modal");
-    const menuToggleBtn = document.getElementById("menu-toggle-btn");
-    const menuCloseBtn = document.getElementById("menu-close-btn");
-    const profileToggleBtn = document.getElementById("profile-toggle-btn");
-    const modalCloseBtn = document.getElementById("modal-close-btn");
-    const backdrop = document.getElementById("menu-backdrop");
-    const saveTopicsBtn = document.getElementById("btn-save-topics");
-
-    // Krypto-Engine Konfiguration
-    const cryptoEngine = {
-        bip39WordList: ["abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse",
+const cryptoEngine = {
+    bip39WordList: ["abandon", "ability", "able", "about", "above", "absent", "absorb", "abstract", "absurd", "abuse",
     "access", "accident", "account", "accuse", "achieve", "acid", "acoustic", "acquire", "across", "act",
     "action", "actor", "actress", "actual", "adapt", "add", "addict", "address", "adjust", "admit",
     "adult", "advance", "advice", "aerobic", "affair", "afford", "afraid", "again", "age", "agent",
@@ -268,73 +273,103 @@ document.addEventListener("DOMContentLoaded", () => {
     "word", "work", "world", "worry", "worth", "wrap", "wreck", "wrestle", "wrist", "write",
     "wrong", "yard", "year", "yellow", "you", "young", "youth", "zebra", "zero", "zone",
     "zoo"],
-        
-        sha256: async (text) => {
-            const msgBuffer = new TextEncoder().encode(text);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', hashBuffer);
-            return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-        },
-        generateFractalHash: async (input, iterations = 5) => {
-            let current = input;
-            for(let i = 0; i < iterations; i++) { current = await cryptoEngine.sha256(current + i); }
-            return current;
-        },
-        generateSecureMnemonic: () => {
-            let phrase = [];
-            const randomValues = new Uint32Array(12);
-            crypto.getRandomValues(randomValues);
-            for (let i = 0; i < 12; i++) {
-                phrase.push(cryptoEngine.bip39WordList[randomValues[i] % cryptoEngine.bip39WordList.length]);
-            }
-            return phrase.join(" ");
-        },
-        deriveEncryptionKey: async (password, salt) => {
-            const encoder = new TextEncoder();
-            const baseKey = await crypto.subtle.importKey("raw", encoder.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
-            return await crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, baseKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
-        },
-        encryptData: async (plaintext, password) => {
-            const encoder = new TextEncoder();
-            const salt = crypto.getRandomValues(new Uint8Array(16));
-            const iv = crypto.getRandomValues(new Uint8Array(12));
-            const cryptoKey = await cryptoEngine.deriveEncryptionKey(password, salt);
-            const encryptedBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, cryptoKey, encoder.encode(plaintext));
-            const exportArray = new Uint8Array(salt.length + iv.length + encryptedBuffer.byteLength);
-            exportArray.set(salt, 0); exportArray.set(iv, salt.length); exportArray.set(new Uint8Array(encryptedBuffer), salt.length + iv.length);
-            return Array.from(exportArray).map(b => b.toString(16).padStart(2, '0')).join('');
-        },
-        initLocalChain: async () => {
-            let chain = JSON.parse(localStorage.getItem("rfof_local_chain") || "[]");
-            if (chain.length === 0) {
-                const genesisBlock = { index: 0, timestamp: new Date().toISOString(), data: "LOCAL_GENESIS_BLOCK", prevHash: "0".repeat(64), hash: "" };
-                genesisBlock.hash = await cryptoEngine.sha256(genesisBlock.index + genesisBlock.timestamp + genesisBlock.data + genesisBlock.prevHash);
-                chain.push(genesisBlock);
-                localStorage.setItem("rfof_local_chain", JSON.stringify(chain));
-            }
-        },
-        mineLocalBlock: async (blockData) => {
-            let chain = JSON.parse(localStorage.getItem("rfof_local_chain") || "[]");
-            const prevBlock = chain[chain.length - 1] || { hash: "0".repeat(64), index: -1 };
-            const newBlock = { index: prevBlock.index + 1, timestamp: new Date().toISOString(), data: blockData, prevHash: prevBlock.hash, hash: "" };
-            newBlock.hash = await cryptoEngine.sha256(newBlock.index + newBlock.timestamp + JSON.stringify(newBlock.data) + newBlock.prevHash);
-            chain.push(newBlock);
-            localStorage.setItem("rfof_local_chain", JSON.stringify(chain));
-            window.parent.postMessage({ type: 'GLOBAL_EXPLORER_ANCHOR', localBlockHash: newBlock.hash }, '*');
+
+    sha256: async (text) => {
+        const msgBuffer = new TextEncoder().encode(text);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    },
+
+    generateFractalHash: async (input, iterations = 5) => {
+        let current = input;
+        for(let i = 0; i < iterations; i++) { current = await cryptoEngine.sha256(current + i); }
+        return current;
+    },
+
+    generateSecureMnemonic: () => {
+        let phrase = [];
+        const randomValues = new Uint32Array(12);
+        crypto.getRandomValues(randomValues);
+        for (let i = 0; i < 12; i++) { phrase.push(cryptoEngine.bip39WordList[randomValues[i] % cryptoEngine.bip39WordList.length]); }
+        return phrase.join(" ");
+    },
+
+    deriveEncryptionKey: async (password, salt) => {
+        const encoder = new TextEncoder();
+        const baseKey = await crypto.subtle.importKey("raw", encoder.encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
+        return await crypto.subtle.deriveKey({ name: "PBKDF2", salt: salt, iterations: 100000, hash: "SHA-256" }, baseKey, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);    },
+
+    encryptData: async (plaintext, password) => {
+        const encoder = new TextEncoder();
+        const salt = crypto.getRandomValues(new Uint8Array(16));
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const cryptoKey = await cryptoEngine.deriveEncryptionKey(password, salt);
+        const encryptedBuffer = await crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, cryptoKey, encoder.encode(plaintext));
+        const exportArray = new Uint8Array(salt.length + iv.length + encryptedBuffer.byteLength);
+        exportArray.set(salt, 0); exportArray.set(iv, salt.length); exportArray.set(new Uint8Array(encryptedBuffer), salt.length + iv.length);
+        return Array.from(exportArray).map(b => b.toString(16).padStart(2, '0')).join('');
+    },
+
+    initDualChains: async () => {
+        let localChain = JSON.parse(localStorage.getItem("rfof_local_chain") || "[]");
+        let globalChain = JSON.parse(localStorage.getItem("rfof_global_chain") || "[]");
+
+        if (localChain.length === 0) {
+            const localGenesis = { index: 0, timestamp: new Date().toISOString(), status: "STATUS_REGISTERED", data: "LOCAL_GENESIS_ROOT", prevHash: "0".repeat(64), hash: "" };
+            localGenesis.hash = await cryptoEngine.sha256(localGenesis.index + localGenesis.status + localGenesis.prevHash);
+            localChain.push(localGenesis);
+            localStorage.setItem("rfof_local_chain", JSON.stringify(localChain));
         }
-    };
 
-    cryptoEngine.initLocalChain();
+        if (globalChain.length === 0) {
+            const globalGenesis = { index: 0, timestamp: new Date().toISOString(), status: "GLOBAL_NETWORK_BOOT", linkedLocalHash: "GENESIS_LINK", prevHash: "0".repeat(64), hash: "" };
+            globalGenesis.hash = await cryptoEngine.sha256(globalGenesis.index + globalGenesis.status + globalGenesis.linkedLocalHash + globalGenesis.prevHash);
+            globalChain.push(globalGenesis);
+            localStorage.setItem("rfof_global_chain", JSON.stringify(globalChain));
+        }
+        
+        window.system.log("Dual Ledger Explorers synchronisiert.", "INF", localChain[0].hash, globalChain[0].hash);
+    },
 
-    // Event Listeners (Auf/Zu Steuerung)
+    mineDualBlock: async (statusMode, dataPayload) => {
+        let localChain = JSON.parse(localStorage.getItem("rfof_local_chain") || "[]");
+        let globalChain = JSON.parse(localStorage.getItem("rfof_global_chain") || "[]");
+
+        const lastLocal = localChain[localChain.length - 1];
+        const lastGlobal = globalChain[globalChain.length - 1];
+
+        const newLocalBlock = { index: lastLocal.index + 1, timestamp: new Date().toISOString(), status: statusMode, data: dataPayload, prevHash: lastLocal.hash, hash: "" };
+        newLocalBlock.hash = await cryptoEngine.sha256(newLocalBlock.index + newLocalBlock.status + JSON.stringify(dataPayload) + newLocalBlock.prevHash);
+        localChain.push(newLocalBlock);
+
+        const newGlobalBlock = { index: lastGlobal.index + 1, timestamp: newLocalBlock.timestamp, status: statusMode + "_GLOBAL_CONFIRMED", linkedLocalHash: newLocalBlock.hash, prevHash: lastGlobal.hash, hash: "" };
+        newGlobalBlock.hash = await cryptoEngine.sha256(newGlobalBlock.index + newGlobalBlock.status + newGlobalBlock.linkedLocalHash + newGlobalBlock.prevHash);
+        globalChain.push(newGlobalBlock);
+
+        localStorage.setItem("rfof_local_chain", JSON.stringify(localChain));
+        localStorage.setItem("rfof_global_chain", JSON.stringify(globalChain));
+
+        window.system.log(`Block #${newLocalBlock.index} gemined! Mode: ${statusMode}`, "BLOCK", newLocalBlock.hash, newGlobalBlock.hash);
+    }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    cryptoEngine.initDualChains();
+
+    const menuToggleBtn = document.getElementById("menu-toggle-btn");
+    const menuCloseBtn = document.getElementById("menu-close-btn");
+    const profileToggleBtn = document.getElementById("profile-toggle-btn");
+    const modalCloseBtn = document.getElementById("modal-close-btn");
+    const backdrop = document.getElementById("menu-backdrop");
+    const accountModal = document.getElementById("account-modal");
+
     if(menuToggleBtn) menuToggleBtn.addEventListener("click", () => window.system.toggleMenu(true));
     if(menuCloseBtn) menuCloseBtn.addEventListener("click", () => window.system.toggleMenu(false));
     if(backdrop) backdrop.addEventListener("click", () => window.system.toggleMenu(false));
-    if(saveTopicsBtn) saveTopicsBtn.addEventListener("click", () => window.system.saveTopics());
 
     if(profileToggleBtn) profileToggleBtn.addEventListener("click", () => accountModal?.classList.remove("hidden"));
     if(modalCloseBtn) modalCloseBtn.addEventListener("click", () => accountModal?.classList.add("hidden"));
 
-    // Submenüs (Dropdowns)
     document.querySelectorAll(".has-submenu").forEach(item => {
         item.addEventListener("click", () => {
             const targetId = item.getAttribute("data-target");
@@ -347,32 +382,23 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Dark Mode Live Trigger
     const darkmodeToggle = document.getElementById("toggle-darkmode");
     if(darkmodeToggle) {
         darkmodeToggle.addEventListener("change", (e) => {
+
             document.body.style.backgroundColor = e.target.checked ? "#0f172a" : "#1e293b";
             window.system.log(`Dark Mode: ${e.target.checked ? 'Active' : 'Inactive'}`);
         });
     }
 
-    // Login Formular Handler
     const loginForm = document.getElementById("login-form");
     if(loginForm) {
-        loginForm.addEventListener("submit", async (e) => {
+        loginForm.addEventListener("submit", (e) => {
             e.preventDefault();
-            const email = document.getElementById("login-email").value;
-            const pass = document.getElementById("login-password").value;
-            const uHash = await cryptoEngine.generateFractalHash(email + pass);
-            
-            localStorage.setItem("user_session_hash", uHash);
-            window.sessionStorage.setItem("active_vault_key", pass);
-            await cryptoEngine.mineLocalBlock({ action: "USER_LOGIN" });
             window.system.auth();
         });
     }
 
-    // Wallet Schnittstellen
     const evmBtn = document.getElementById("btn-wallet-evm");
     const btcBtn = document.getElementById("btn-wallet-btc");
 
@@ -380,26 +406,22 @@ document.addEventListener("DOMContentLoaded", () => {
         evmBtn.addEventListener("click", async () => {
             if (window.ethereum) {
                 const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                await cryptoEngine.mineLocalBlock({ action: "EVM_CONNECT", acc: accounts[0] });
-                window.system.log(`EVM connected: ${accounts[0]}`);
+                await cryptoEngine.mineDualBlock("STATUS_WALLET_DEPLOYED", { type: "EVM", address: accounts });
             } else {
                 const vaultKey = window.sessionStorage.getItem("active_vault_key");
                 if(!vaultKey) { alert("Bitte logge dich zuerst ein!"); return; }
-                const mnemonic = cryptoEngine.generateSecureMnemonic();
-                const enc = await cryptoEngine.encryptData(mnemonic, vaultKey);
-                localStorage.setItem("local_hot_wallet_enc", enc);
-                await cryptoEngine.mineLocalBlock({ action: "HOT_WALLET_CREATE" });
-                alert(`Wallet verschlüsselt erzeugt!\nPhrase:\n${mnemonic}`);
+                const seed = cryptoEngine.generateSecureMnemonic();
+                const encrypted = await cryptoEngine.encryptData(seed, vaultKey);
+                localStorage.setItem("local_hot_wallet_enc", encrypted);
+                await cryptoEngine.mineDualBlock("STATUS_WALLET_DEPLOYED", { type: "LOCAL_HOT_VAULT" });
+                alert(`Wallet erzeugt! Mnemonic:\n\n${seed}`);
+            }
+        });
+    }
 
-}
+    if(btcBtn) {
+        btcBtn.addEventListener("click", async () => {
+            await cryptoEngine.mineDualBlock("STATUS_WALLET_DEPLOYED", { type: "BTC_TAPROOT_TELNET" });
+        });
+    }
 });
-}
-if(btcBtn) {
-btcBtn.addEventListener("click", async () => {
-await cryptoEngine.mineLocalBlock({ action: "TELNET_HANDSHAKE" });
-window.system.log("BTC Taproot Telnet Tunnel open.");
-});
-}
-});
-
-
