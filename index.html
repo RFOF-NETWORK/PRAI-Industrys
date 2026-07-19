@@ -21,8 +21,11 @@
 
     <!-- Navigations-Trigger für das linke Dropdown-Menü -->
     <div class="max-w-md mx-auto mb-4 flex justify-between items-center">
-        <button onclick="system.toggleMenu(true)" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition">
+        <button id="menu-toggle-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition">
             ☰ Menu
+        </button>
+        <button id="profile-toggle-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition">
+            👤 Account
         </button>
         <span class="text-xs text-slate-500 font-mono">v1.0.0-telnet-ready</span>
     </div>
@@ -30,22 +33,24 @@
     <div id="app" class="max-w-md mx-auto relative z-10">
         <h1 class="text-2xl font-bold mb-6 text-blue-400">🦅 Golden Phoenix / Science X</h1>
         
-        <!-- Auth Modal UI (Optimiert nach Bild 1 mit X-Schließen und Krypto-Schnittstelle) -->
-        <div id="auth-modal" class="glass p-6 relative">
-            <button onclick="system.closeAuth()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">×</button>
+        <!-- Auth Modal UI (Science X Login-Schnittstelle) -->
+        <div id="account-modal" class="glass p-6 relative hidden">
+            <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">×</button>
             <h2 class="text-xl mb-4 font-semibold text-center">Science X Account</h2>
             
-            <div class="relative mb-3">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">@</span>
-                <input type="email" id="email" placeholder="Email" class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
-            </div>
-            
-            <div class="relative mb-4">
-                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">🔒</span>
-                <input type="password" id="password" placeholder="Password" class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
-            </div>
+            <form id="login-form">
+                <div class="relative mb-3">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">@</span>
+                    <input type="email" id="login-email" placeholder="Email" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
+                </div>
+                
+                <div class="relative mb-4">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">🔒</span>
+                    <input type="password" id="login-password" placeholder="Password" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
+                </div>
 
-            <button onclick="system.auth()" class="auth-btn bg-slate-700 hover:bg-slate-600 text-white">Sign in</button>
+                <button type="submit" class="auth-btn bg-slate-700 hover:bg-slate-600 text-white">Sign in</button>
+            </form>
             
             <div class="text-center my-2 text-sm text-slate-500">or</div>
             
@@ -61,8 +66,8 @@
 
             <!-- Web3 Krypto-Erweiterung für EVM & BTC (Telnet Ready) -->
             <div class="mt-4 pt-4 border-t border-slate-700 grid grid-cols-2 gap-2">
-                <button onclick="system.connectEVM()" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">Connect EVM</button>
-                <button onclick="system.connectBTC()" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white">BTC Telnet</button>
+                <button id="btn-wallet-evm" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">Connect EVM</button>
+                <button id="btn-wallet-btc" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white">BTC Telnet</button>
             </div>
 
             <div class="text-center mt-4 text-xs text-slate-400">
@@ -71,7 +76,7 @@
             </div>
         </div>
 
-        <!-- Dashboard Bereich -->
+        <!-- Dashboard Bereich (Wird nach system.auth() sichtbar) -->
         <div id="dashboard" class="hidden">
             <div class="glass p-6 mb-6">
                 <h3 class="text-lg font-bold text-orange-500 uppercase">Topic Settings</h3>
@@ -81,10 +86,16 @@
                 </div>
                 <button onclick="system.saveTopics()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 p-2 rounded font-bold transition">Save and exit</button>
             </div>
-            
-            <!-- Persistent Log Output -->
-            <div id="chain-output" class="glass p-4 font-mono text-xs text-green-500 h-64 overflow-y-auto">
-                System Initialized...
+        </div>
+
+        <!-- Persistent Log Terminal (Sichtbar für den Local/Global Explorer Datenstrom) -->
+        <div class="glass p-4">
+            <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-1">
+                <span class="text-xs font-bold text-slate-400 font-mono">📡 NODE_CHAIN_LOGGER</span>
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            </div>
+            <div id="chain-output" class="font-mono text-xs text-green-500 h-64 overflow-y-auto">
+                System Chain Initialized...
             </div>
         </div>
     </div>
@@ -93,7 +104,7 @@
     <div id="sidebar-menu" class="fixed inset-y-0 left-0 w-80 bg-slate-900 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 overflow-y-auto hidden">
         <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
             <span class="font-bold text-blue-400 font-mono text-sm">@RFOF-MENU</span>
-            <button onclick="system.toggleMenu(false)" class="text-slate-400 hover:text-white text-2xl font-bold px-2">×</button>
+            <button id="menu-close-btn" class="text-slate-400 hover:text-white text-2xl font-bold px-2">×</button>
         </div>
 
         <!-- Suchleiste im Menü -->
@@ -103,114 +114,117 @@
 
         <!-- Verschachtelte Kategorien -->
         <div class="p-2 space-y-1 text-sm">
-            Hier ist der vollständig fusionierte und lückenlose Code-Abschnitt für das Dropdown-Menü. Es wurden alle Hauptkategorien (Nanotechnology, Physics, Astronomy & Space, Earth, Chemistry, Biology, Other Sciences) inklusive sämtlicher Unterseiten aus deinen Nachrichten chronologisch zusammengeführt und eins zu eins erhalten.
-
+            
             <!-- Nanotechnology (Bild 9) -->
-            <div>
-                <button onclick="system.toggleSubmenu('sub-nanotech')" class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
-                    <span>Nanotechnology</span><span>›</span>
-                </button>
-                <div id="sub-nanotech" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                    <a href="#" class="block p-2 hover:text-white">Nanotechnology</a>
-                    <a href="#" class="block p-2 hover:text-white">Bio & Medicine</a>
-                    <a href="#" class="block p-2 hover:text-white">Nanomaterials</a>
-                    <a href="#" class="block p-2 hover:text-white">Nanophysics</a>
+            <div class="has-submenu cursor-pointer" data-target="sub-nanotech">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                    <span>⚙️ Nanotechnology</span><span class="arrow">›</span>
                 </div>
+            </div>
+            <div id="sub-nanotech" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
+                <a href="#" class="block p-2 hover:text-white">Nanotechnology</a>
+                <a href="#" class="block p-2 hover:text-white">Bio & Medicine</a>
+                <a href="#" class="block p-2 hover:text-white">Nanomaterials</a>
+                <a href="#" class="block p-2 hover:text-white">Nanophysics</a>
             </div>
 
             <!-- Physics (Bild 8) -->
-            <div>
-                <button onclick="system.toggleSubmenu('sub-physics')" class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
-                    <span>Physics</span><span>›</span>
-                </button>
-                <div id="sub-physics" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                    <a href="#" class="block p-2 hover:text-white">Physics</a>
-                    <a href="#" class="block p-2 hover:text-white">Condensed Matter</a>
-                    <a href="#" class="block p-2 hover:text-white">General Physics</a>
-                    <a href="#" class="block p-2 hover:text-white">Optics & Photonics</a>
-                    <a href="#" class="block p-2 hover:text-white">Plasma Physics</a>
-                    <a href="#" class="block p-2 hover:text-white">Quantum Physics</a>
-                    <a href="#" class="block p-2 hover:text-white">Soft Matter</a>
-                    <a href="#" class="block p-2 hover:text-white">Superconductivity</a>
+            <div class="has-submenu cursor-pointer" data-target="sub-physics">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                    <span>⚛️ Physics</span><span class="arrow">›</span>
                 </div>
+            </div>
+            <div id="sub-physics" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
+                <a href="#" class="block p-2 hover:text-white">Physics</a>
+                <a href="#" class="block p-2 hover:text-white">Condensed Matter</a>
+                <a href="#" class="block p-2 hover:text-white">General Physics</a>
+                <a href="#" class="block p-2 hover:text-white">Optics & Photonics</a>
+                <a href="#" class="block p-2 hover:text-white">Plasma Physics</a>
+                <a href="#" class="block p-2 hover:text-white">Quantum Physics</a>
+                <a href="#" class="block p-2 hover:text-white">Soft Matter</a>
+                <a href="#" class="block p-2 hover:text-white">Superconductivity</a>
             </div>
 
             <!-- Astronomy & Space (Bild 7) -->
-            <div>
-                <button onclick="system.toggleSubmenu('sub-astronomy')" class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
-                    <span>Astronomy & Space</span><span>›</span>
-                </button>
-                <div id="sub-astronomy" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                    <a href="#" class="block p-2 hover:text-white">Astronomy & Space</a>
-                    <a href="#" class="block p-2 hover:text-white">Astrobiology</a>
-                    <a href="#" class="block p-2 hover:text-white">Astronomy</a>
-                    <a href="#" class="block p-2 hover:text-white">Planetary Sciences</a>
-                    <a href="#" class="block p-2 hover:text-white">Space Exploration</a>
+            <div class="has-submenu cursor-pointer" data-target="sub-astronomy">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                    <span>🚀 Astronomy & Space</span><span class="arrow">›</span>
                 </div>
+            </div>
+            <div id="sub-astronomy" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
+                <a href="#" class="block p-2 hover:text-white">Astronomy & Space</a>
+                <a href="#" class="block p-2 hover:text-white">Astrobiology</a>
+                <a href="#" class="block p-2 hover:text-white">Astronomy</a>
+                <a href="#" class="block p-2 hover:text-white">Planetary Sciences</a>
+                <a href="#" class="block p-2 hover:text-white">Space Exploration</a>
             </div>
 
             <!-- Earth (Bild 6) -->
-            <div>
-                <button onclick="system.toggleSubmenu('sub-earth')" class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
-                    <span>Earth</span><span>›</span>
-                </button>
-                <div id="sub-earth" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                    <a href="#" class="block p-2 hover:text-white">Earth</a>
-                    <a href="#" class="block p-2 hover:text-white">Earth Sciences</a>
-                    <a href="#" class="block p-2 hover:text-white">Environment</a>
+            <div class="has-submenu cursor-pointer" data-target="sub-earth">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+
+            <!-- Earth (Bild 6) -->
+            <div class="has-submenu cursor-pointer" data-target="sub-earth">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                    <span>🌍 Earth</span><span class="arrow">›</span>
                 </div>
+            </div>
+            <div id="sub-earth" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
+                <a href="#" class="block p-2 hover:text-white">Earth</a>
+                <a href="#" class="block p-2 hover:text-white">Earth Sciences</a>
+                <a href="#" class="block p-2 hover:text-white">Environment</a>
             </div>
 
             <!-- Chemistry (Bild 5) -->
-            <div>
-                <button onclick="system.toggleSubmenu('sub-chemistry')" class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
-                    <span>Chemistry</span><span>›</span>
-                </button>
-                <div id="sub-chemistry" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                    <a href="#" class="block p-2 hover:text-white">Chemistry</a>
-                    <a href="#" class="block p-2 hover:text-white">Analytical Chemistry</a>
-                    <a href="#" class="block p-2 hover:text-white">Biochemistry</a>
-                    <a href="#" class="block p-2 hover:text-white">Materials Science</a>
-                    <a href="#" class="block p-2 hover:text-white">Other</a>
-                    <a href="#" class="block p-2 hover:text-white">Polymers</a>
+            <div class="has-submenu cursor-pointer" data-target="sub-chemistry">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                    <span>🧪 Chemistry</span><span class="arrow">›</span>
                 </div>
+            </div>
+            <div id="sub-chemistry" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
+                <a href="#" class="block p-2 hover:text-white">Chemistry</a>
+                <a href="#" class="block p-2 hover:text-white">Analytical Chemistry</a>
+                <a href="#" class="block p-2 hover:text-white">Biochemistry</a>
+                <a href="#" class="block p-2 hover:text-white">Materials Science</a>
+                <a href="#" class="block p-2 hover:text-white">Other</a>
+                <a href="#" class="block p-2 hover:text-white">Polymers</a>
             </div>
 
             <!-- Biology (Bild 4) -->
-            <div>
-                <button onclick="system.toggleSubmenu('sub-biology')" class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
-                    <span>Biology</span><span>›</span>
-                </button>
-                <div id="sub-biology" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                    <a href="#" class="block p-2 hover:text-white">Biology</a>
-                    <a href="#" class="block p-2 hover:text-white">Agriculture</a>
-                    <a href="#" class="block p-2 hover:text-white">Biotechnology</a>
-                    <a href="#" class="block p-2 hover:text-white">Cell & Microbiology</a>
-                    <a href="#" class="block p-2 hover:text-white">Ecology</a>
-                    <a href="#" class="block p-2 hover:text-white">Evolution</a>
-                    <a href="#" class="block p-2 hover:text-white">Molecular & Computational biology</a>
-                    <a href="#" class="block p-2 hover:text-white">Other</a>
-                    <a href="#" class="block p-2 hover:text-white">Paleontology & Fossils</a>
-                    <a href="#" class="block p-2 hover:text-white">Plants & Animals</a>
-                    <a href="#" class="block p-2 hover:text-white">Veterinary medicine</a>
+            <div class="has-submenu cursor-pointer" data-target="sub-biology">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                    <span>🧬 Biology</span><span class="arrow">›</span>
                 </div>
+            </div>
+            <div id="sub-biology" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
+                <a href="#" class="block p-2 hover:text-white">Biology</a>
+                <a href="#" class="block p-2 hover:text-white">Agriculture</a>
+                <a href="#" class="block p-2 hover:text-white">Biotechnology</a>
+                <a href="#" class="block p-2 hover:text-white">Cell & Microbiology</a>
+                <a href="#" class="block p-2 hover:text-white">Ecology</a>
+                <a href="#" class="block p-2 hover:text-white">Evolution</a>
+                <a href="#" class="block p-2 hover:text-white">Molecular & Computational biology</a>
+                <a href="#" class="block p-2 hover:text-white">Other</a>
+                <a href="#" class="block p-2 hover:text-white">Paleontology & Fossils</a>
+                <a href="#" class="block p-2 hover:text-white">Plants & Animals</a>
+                <a href="#" class="block p-2 hover:text-white">Veterinary medicine</a>
             </div>
 
             <!-- Other Sciences (Bild 2 & 3) -->
-            <div>
-                <button onclick="system.toggleSubmenu('sub-other')" class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
-                    <span>Other Sciences</span><span>›</span>
-                </button>
-                <div id="sub-other" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                    <a href="#" class="block p-2 hover:text-white">Other Sciences</a>
-                    <a href="#" class="block p-2 hover:text-white">Archaeology</a>
-                    <a href="#" class="block p-2 hover:text-white">Economics & Business</a>
-                    <a href="#" class="block p-2 hover:text-white">Education</a>
-                    <a href="#" class="block p-2 hover:text-white">Mathematics</a>
-                    <a href="#" class="block p-2 hover:text-white">Other</a>
-                    <a href="#" class="block p-2 hover:text-white">Political science</a>
-                    <a href="#" class="block p-2 hover:text-white">Social Sciences</a>
+            <div class="has-submenu cursor-pointer" data-target="sub-other">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                    <span>📚 Other Sciences</span><span class="arrow">›</span>
                 </div>
+            </div>
+            <div id="sub-other" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
+                <a href="#" class="block p-2 hover:text-white">Other Sciences</a>
+                <a href="#" class="block p-2 hover:text-white">Archaeology</a>
+                <a href="#" class="block p-2 hover:text-white">Economics & Business</a>
+                <a href="#" class="block p-2 hover:text-white">Education</a>
+                <a href="#" class="block p-2 hover:text-white">Mathematics</a>
+                <a href="#" class="block p-2 hover:text-white">Other</a>
+                <a href="#" class="block p-2 hover:text-white">Political science</a>
+                <a href="#" class="block p-2 hover:text-white">Social Sciences</a>
             </div>
         </div>
 
@@ -227,14 +241,14 @@
 
             <div class="flex justify-between items-center text-slate-300">
                 <span>🌙 Dark mode</span>
-                <input type="checkbox" checked onchange="system.toggleDarkMode(this)" class="w-4 h-4 accent-blue-500">
+                <input type="checkbox" id="toggle-darkmode" checked class="w-4 h-4 accent-blue-500">
             </div>
 
             <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-2.5 rounded-lg text-xs transition">
                 Subscribe to Newsletter
             </button>
 
-            <!-- Social Icons (Bild 2) -->
+            <!-- Social Media Verknüpfungen (Bild 2) -->
             <div class="flex justify-between text-slate-500 pt-2 text-base">
                 <a href="#" class="hover:text-white"><i class="fab fa-facebook"></i></a>
                 <a href="#" class="hover:text-white"><i class="fab fa-linkedin"></i></a>
@@ -251,183 +265,30 @@
         </div>
     </div>
 
-    <!-- Hintergrund-Backdrop für das Menü -->
-    <div id="menu-backdrop" onclick="system.toggleMenu(false)" class="fixed inset-0 bg-black/50 z-40 hidden"></div>
-
+    <!-- Interne Struktur-Logik für Initialaufrufe -->
     <script>
-        // ==========================================
-        // SECTION 1: AUTOMATISCHE EVENT-LISTENER (Aus Nachricht 1 & 5)
-        // ==========================================
-        document.addEventListener("DOMContentLoaded", () => {
-            // UI Elemente für Sidebar und Modal abgreifen
-            const sidebarMenu = document.getElementById("sidebar-menu");
-            const accountModal = document.getElementById("account-modal");
-            const menuToggleBtn = document.getElementById("menu-toggle-btn");
-            const menuCloseBtn = document.getElementById("menu-close-btn");
-            const profileToggleBtn = document.getElementById("profile-toggle-btn");
-            const modalCloseBtn = document.getElementById("modal-close-btn");
-
-            // Sidebar Toggling über dedizierte Buttons
-            if(menuToggleBtn) {
-                menuToggleBtn.addEventListener("click", () => sidebarMenu.classList.remove("hidden"));
-            }
-            if(menuCloseBtn) {
-                menuCloseBtn.addEventListener("click", () => sidebarMenu.classList.add("hidden"));
-            }
-
-            // Account Modal Toggling über Profil-Buttons
-            if(profileToggleBtn) {
-                profileToggleBtn.addEventListener("click", () => accountModal.classList.remove("hidden"));
-            }
-            if(modalCloseBtn) {
-                modalCloseBtn.addEventListener("click", () => accountModal.classList.add("hidden"));
-            }
-
-            // Kaskadierendes Dropdown-Menü (Verschachtelung aus den Bildern 2-9)
-            const submenus = document.querySelectorAll(".has-submenu");
-            submenus.forEach(item => {
-                item.addEventListener("click", () => {
-                    const targetId = item.getAttribute("data-target");
-                    const targetSubmenu = document.getElementById(targetId);
-                    const arrow = item.querySelector(".arrow");
-
-                    if (targetSubmenu && targetSubmenu.classList.contains("hidden")) {
-                        targetSubmenu.classList.remove("hidden");
-                        if(arrow) arrow.innerText = "⋁";
-                        item.classList.add("active-menu");
-                    } else if (targetSubmenu) {
-                        targetSubmenu.classList.add("hidden");
-                        if(arrow) arrow.innerText = "›";
-                        item.classList.remove("active-menu");
-                    }
-                });
-            });
-
-            // Dark Mode Switcher Event-Listener (Bild 2 & 6)
-            const darkmodeToggle = document.getElementById("toggle-darkmode");
-            if(darkmodeToggle) {
-                darkmodeToggle.addEventListener("change", (e) => {
-                    if(e.target.checked) {
-                        document.body.classList.add("dark-theme");
-                        if(sidebarMenu) sidebarMenu.classList.add("dark-mode-bg");
-                        document.body.style.backgroundColor = "#0f172a";
-                        system.log("Dark Mode status: Active.");
-                    } else {
-                        document.body.classList.remove("dark-theme");
-                        if(sidebarMenu) sidebarMenu.classList.remove("dark-mode-bg");
-                        document.body.style.backgroundColor = "#1e293b";
-                        system.log("Dark Mode status: Inactive.");
-                    }
-                });
-            }
-        });
-
-        // ==========================================
-        // SECTION 2: GLOBAL SYSTEM OBJECT (Aus Nachricht 2, 3 & 4)
-        // ==========================================
         const system = {
-            // Authentifizierung & Dashboard-Umschaltung
             auth: () => {
-                document.getElementById('auth-modal').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
+                const modal = document.getElementById('account-modal');
+                const dash = document.getElementById('dashboard');
+                if(modal) modal.classList.add('hidden');
+                if(dash) dash.classList.remove('hidden');
                 system.renderTopics();
-                system.log("User successfully signed in via Science X.");
             },
-            closeAuth: () => {
-                document.getElementById('auth-modal').classList.add('hidden');
-                system.log("Auth modal closed by user.");
-            },
-            // Generierung der Hauptthemen im Dashboard
             renderTopics: () => {
                 const topics = ["Nanotechnology", "Physics", "Astronomy & Space", "Earth", "Chemistry", "Biology"];
                 const container = document.getElementById('topic-list');
                 if (!container) return;
-                container.innerHTML = ''; // Verhindert doppelte Einträge
+                container.innerHTML = ''; 
                 topics.forEach(t => {
                     container.innerHTML += `<div class="flex items-center gap-2"><input type="checkbox" checked class="accent-orange-500"> <span>${t}</span></div>`;
                 });
             },
             saveTopics: () => {
-                system.log("Topic Settings saved persistently.");
-                alert("Settings saved!");
-            },
-            // Steuerung des linken Sidebar-Menüs via Inline-onclicks
-            toggleMenu: (open) => {
-                const menu = document.getElementById('sidebar-menu');
-                const backdrop = document.getElementById('menu-backdrop');
-                if (!menu) return;
-                
-                if (open) {
-                    menu.classList.remove('hidden');
-                    if(backdrop) backdrop.classList.remove('hidden');
-                    setTimeout(() => menu.classList.remove('-translate-x-full'), 10);
-                } else {
-                    menu.classList.add('-translate-x-full');
-                    if(backdrop) backdrop.classList.add('hidden');
-                    setTimeout(() => menu.classList.add('hidden'), 300);
-                }
-            },
-            // Submenü-Akkordeon Logik (Inline-Fallback)
-            toggleSubmenu: (id) => {
-                const sub = document.getElementById(id);
-                if (sub) sub.classList.toggle('hidden');
-            },
-            // Dark Mode Live-Umschalter für direkte Inline-Aufrufe
-            toggleDarkMode: (cb) => {
-                if (cb.checked) {
-                    document.body.style.backgroundColor = "#0f172a";
-                    system.log("Dark Mode status: Active.");
-                } else {
-                    document.body.style.backgroundColor = "#1e293b";
-                    system.log("Dark Mode status: Inactive.");
-                }
-            },
-            // Web3 Krypto-Schnittstellen (Finanz- & Datenkryptographie via postMessage)
-            connectEVM: async () => {
-                system.log("EVM Gateway Handshake initiated...");
-                if (typeof window.ethereum !== 'undefined') {
-                    try {
-                        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                        system.log(`EVM Wallet erfolgreich verbunden: ${accounts}`);
-                        // Verbindung via Frames an verbundene Services übermitteln
-                        window.parent.postMessage({ type: 'CRYPTO_AUTH', wallet: 'EVM', address: accounts }, '*');
-                    } catch (err) {
-                        system.log(`EVM Fehler: ${err.message}`, true);
-                    }
-                } else {
-                    system.log("EVM Flash: Frame fallback activated.", true);
-                }
-            },
-            connectBTC: () => {
-                system.log("BTC Taproot Telnet Tunnel established synchronously.");
-                // Telnet-Protokoll-Handling über deinen KI-Nachrichtendienst
-                if (window.BitcoinProvider) {
-                    system.log("Verbinde persistent mit BTC-Knoten-Schnittstelle...");
-                } else {
-                    system.log("Simultan-Übertragung: Warte auf BTC Telnet Frame Handshake.");
-                }
-            },
-            // Simultanes, persistentes Logging-System mit LocalStorage-Spiegelung
-            log: (msg, isErr = false) => {
-                const out = document.getElementById('chain-output');
-                const time = new Date().toLocaleTimeString();
-                const prefix = isErr ? `<span class='text-red-500'>[ERR]</span>` : `<span>[INF]</span>`;
-                
-                if (out) {
-                    out.innerHTML += `<br>${prefix} [${time}] ${msg}`;
-                    out.scrollTop = out.scrollHeight;
-                }
-                
-                // Konsolen-Spiegelung mit ISO-Zeitstempel
-                const logStyle = isErr ? "🔴 [ERROR]" : "🟢 [INFO]";
-                console.log(`${logStyle} [${new Date().toISOString()}] ${msg}`);
-                
-                // Persistenz im LocalStorage spiegeln (hält die letzten 100 Einträge persistent)
-                let history = JSON.parse(localStorage.getItem('rfof_logs') || "[]");
-                history.push({t: time, m: msg, e: isErr});
-                localStorage.setItem('rfof_logs', JSON.stringify(history.slice(-100)));
+                alert("Settings persistent locked via Local/Global Anchor!");
             }
         };
     </script>
+    <script src="app.js"></script>
 </body>
 </html>
