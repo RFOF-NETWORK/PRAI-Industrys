@@ -35,46 +35,49 @@
         
         <!-- Auth Modal UI (Isoliertes Account-Fenster) -->
         <div id="account-modal" class="glass p-6 relative">
-            <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl cursor-pointer">×</button>
-            <h2 class="text-xl mb-4 font-semibold text-center">Science X Account</h2>
-            
-            <form id="login-form">
-                <div class="relative mb-3">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">@</span>
-                    <input type="email" id="login-email" placeholder="Email" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
-                </div>
-                
-                <div class="relative mb-4">
-                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">🔒</span>
-                    <input type="password" id="login-password" placeholder="Password" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
-                </div>
-
-                <button type="submit" class="auth-btn bg-slate-700 hover:bg-slate-600 text-white">Sign in</button>
-            </form>
-            
-            <div class="text-center my-2 text-sm text-slate-500">or</div>
-            
-            <button class="auth-btn bg-white text-black flex items-center justify-center gap-2 hover:bg-slate-200">
-                <i class="fab fa-google"></i> Sign in with Google
-            </button>
-            <button class="auth-btn bg-blue-600 text-white flex items-center justify-center gap-2 hover:bg-blue-700">
-                <i class="fab fa-facebook"></i> Continue with Facebook
-            </button>
-            <button class="auth-btn bg-black text-white flex items-center justify-center gap-2 hover:bg-slate-900 border border-slate-700">
-                <i class="fab fa-apple"></i> Sign in with Apple
-            </button>
-
-            <!-- Web3 Krypto-Schnittstellen (Synchronisiert mit app.js) -->
-            <div class="mt-4 pt-4 border-t border-slate-700 grid grid-cols-2 gap-2">
-                <button id="btn-wallet-evm" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-purple-600 to-indigo-600 text-white cursor-pointer">Connect EVM</button>
-                <button id="btn-wallet-btc" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-amber-600 to-orange-600 text-white cursor-pointer">BTC Telnet</button>
-            </div>
-
-            <div class="text-center mt-4 text-xs text-slate-400">
-                <a href="#" class="hover:underline block mb-1">Forgot Password?</a>
-                Not a member? <a href="#" class="text-blue-400 hover:underline">Sign up</a>
-            </div>
+    <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl cursor-pointer">×</button>
+    <!-- ERGÄNZT: id="modal-title" für die dynamische Beschriftung -->
+    <h2 id="modal-title" class="text-xl mb-4 font-semibold text-center">Science X Account</h2>
+    
+    <form id="login-form">
+        <div class="relative mb-3">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">@</span>
+            <input type="email" id="login-email" placeholder="Email" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
         </div>
+        
+        <div class="relative mb-4">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">🔒</span>
+            <input type="password" id="login-password" placeholder="Password" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
+        </div>
+
+        <!-- ERGÄNZT: id="submit-btn" für die dynamische Button-Beschriftung -->
+        <button type="submit" id="submit-btn" class="auth-btn bg-slate-700 hover:bg-slate-600 text-white w-full p-3 rounded">Sign in</button>
+    </form>
+    
+    <div class="text-center my-2 text-sm text-slate-500">or</div>
+    
+    <!-- Bestehende Buttons bleiben gleich -->
+    <button class="auth-btn bg-white text-black flex items-center justify-center gap-2 hover:bg-slate-200">
+        <i class="fab fa-google"></i> Sign in with Google
+    </button>
+    <button class="auth-btn bg-blue-600 text-white flex items-center justify-center gap-2 hover:bg-blue-700">
+        <i class="fab fa-facebook"></i> Continue with Facebook
+    </button>
+    <button class="auth-btn bg-black text-white flex items-center justify-center gap-2 hover:bg-slate-900 border border-slate-700">
+        <i class="fab fa-apple"></i> Sign in with Apple
+    </button>
+
+    <div class="mt-4 pt-4 border-t border-slate-700 grid grid-cols-2 gap-2">
+        <button id="btn-wallet-evm" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-purple-600 to-indigo-600 text-white cursor-pointer">Connect EVM</button>
+        <button id="btn-wallet-btc" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-amber-600 to-orange-600 text-white cursor-pointer">BTC Telnet</button>
+    </div>
+
+    <div class="text-center mt-4 text-xs text-slate-400">
+        <a href="#" class="hover:underline block mb-1">Forgot Password?</a>
+        <!-- ERGÄNZT: id="toggle-auth-mode" zum triggern des Wechsels -->
+        Not a member? <button id="toggle-auth-mode" class="text-blue-400 hover:underline bg-transparent border-0 cursor-pointer">Sign up</button>
+    </div>
+  </div>
 
         <!-- Dashboard Bereich (Wird nach system.auth() freigeschaltet) -->
         <div id="dashboard" class="hidden">
