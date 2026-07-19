@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@RFOF-NETWORK - Science X Integration</title>
-    <!-- Offizieller Tailwind v4 Browser CDN Verweis -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', sans-serif; }
         .glass { background: #1e293b; border: 1px solid #334155; border-radius: 12px; }
         .auth-btn { width: 100%; padding: 12px; border-radius: 8px; margin-bottom: 10px; font-weight: 600; text-align: center; cursor: pointer; transition: 0.2s; }
         .hidden { display: none !important; }
+        /* Custom scrollbar für das Terminal */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
@@ -21,7 +21,7 @@
 
     <!-- Navigations-Trigger -->
     <div class="max-w-md mx-auto mb-4 flex justify-between items-center">
-        <button id="menu-toggle-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition">
+        <button onclick="system.toggleMenu(true)" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition">
             ☰ Menu
         </button>
         <button id="profile-toggle-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition">
@@ -34,19 +34,19 @@
         <h1 class="text-2xl font-bold mb-6 text-blue-400">🦅 Golden Phoenix / Science X</h1>
         
         <!-- Auth Modal UI -->
-        <div id="account-modal" class="glass p-6 relative hidden">
+        <div id="account-modal" class="glass p-6 relative">
             <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">×</button>
             <h2 class="text-xl mb-4 font-semibold text-center">Science X Account</h2>
             
             <form id="login-form">
                 <div class="relative mb-3">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">@</span>
-                    <input type="email" id="login-email" placeholder="Email" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
+                    <input type="email" id="email" placeholder="Email" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
                 </div>
                 
                 <div class="relative mb-4">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">🔒</span>
-                    <input type="password" id="login-password" placeholder="Password" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
+                    <input type="password" id="password" placeholder="Password" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
                 </div>
 
                 <button type="submit" class="auth-btn bg-slate-700 hover:bg-slate-600 text-white">Sign in</button>
@@ -64,9 +64,10 @@
                 <i class="fab fa-apple"></i> Sign in with Apple
             </button>
 
+            <!-- Web3 Krypto-Erweiterung für EVM & BTC (Telnet Ready) -->
             <div class="mt-4 pt-4 border-t border-slate-700 grid grid-cols-2 gap-2">
-                <button id="btn-wallet-evm" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white">Connect EVM</button>
-                <button id="btn-wallet-btc" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white">BTC Telnet</button>
+                <button id="btn-wallet-evm" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-purple-600 to-indigo-600 text-white">Connect EVM</button>
+                <button id="btn-wallet-btc" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-amber-600 to-orange-600 text-white">BTC Telnet</button>
             </div>
 
             <div class="text-center mt-4 text-xs text-slate-400">
@@ -75,29 +76,39 @@
             </div>
         </div>
 
-        <!-- Dashboard Bereich -->
+        <!-- Dashboard Bereich (Wird nach Login entsperrt) -->
         <div id="dashboard" class="hidden">
+            <!-- Wissenschafts-Register Menü-Struktur (Direkt integriert) -->
+            <div id="science-x-nav" class="glass p-4 mb-6">
+                <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                    <h3 class="text-sm font-bold text-blue-400 uppercase">Wissenschafts-Register</h3>
+                    <button onclick="system.toggleMenu(true)" class="text-slate-400 hover:text-white">☰ Open Full Menu</button>
+                </div>
+            </div>
+            
             <div class="glass p-6 mb-6">
                 <h3 class="text-lg font-bold text-orange-500 uppercase">Topic Settings</h3>
                 <p class="text-xs mb-4">Identify the news topics you want to see.</p>
-                <div id="topic-list" class="space-y-2"></div>
-                <button id="btn-save-topics" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 p-2 rounded font-bold transition">Save and exit</button>
+                <div id="topic-list" class="space-y-2">
+                    <!-- Checkboxen werden via app.js generiert -->
+                </div>
+                <button onclick="system.saveTopics()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 p-2 rounded font-bold text-white transition">Save and exit</button>
             </div>
-        </div>
-
-        <!-- Persistent Log Terminal -->
-        <div class="glass p-4">
-            <div class="flex justify-between items-center mb-2 border-b border-slate-700 pb-1">
-                <span class="text-xs font-bold text-slate-400 font-mono">📡 NODE_CHAIN_LOGGER</span>
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            </div>
-            <div id="chain-output" class="font-mono text-xs text-green-500 h-64 overflow-y-auto">
-                System Chain Initialized...
+            
+            <!-- Persistent Chain Ledger Output -->
+            <div class="glass p-4 mb-4">
+                <div class="text-xs font-bold text-slate-400 font-mono mb-2 border-b border-slate-700 pb-1 flex justify-between">
+                    <span>📡 DUAL_EXPLORER_LEDGER_STREAM</span>
+                    <span class="text-green-400 animate-pulse">● LIVE</span>
+                </div>
+                <div id="chain-output" class="font-mono text-[10px] text-green-500 h-64 overflow-y-auto space-y-1">
+                    System Initialized...
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- LINKES NAVIGATIONS-DROPDOWN MENÜ -->
+    <!-- LINKES NAVIGATIONS-DROPDOWN MENÜ (Exakt nach den 10 Bildern designt) -->
     <div id="sidebar-menu" class="fixed inset-y-0 left-0 w-80 bg-slate-900 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 overflow-y-auto hidden">
         <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
             <span class="font-bold text-blue-400 font-mono text-sm">@RFOF-MENU</span>
@@ -109,7 +120,7 @@
         </div>
 
         <div class="p-2 space-y-1 text-sm">
-            <!-- Sektionen -->
+            <!-- Nanotechnology (Bild 9) -->
             <div class="has-submenu cursor-pointer" data-target="sub-nanotech">
                 <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
                     <span>⚙️ Nanotechnology</span><span class="arrow">›</span>
@@ -122,6 +133,7 @@
                 <a href="#" class="block p-2 hover:text-white">Nanophysics</a>
             </div>
 
+            <!-- Physics (Bild 8) -->
             <div class="has-submenu cursor-pointer" data-target="sub-physics">
                 <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
                     <span>⚛️ Physics</span><span class="arrow">›</span>
@@ -138,6 +150,7 @@
                 <a href="#" class="block p-2 hover:text-white">Superconductivity</a>
             </div>
 
+            <!-- Astronomy & Space (Bild 7) -->
             <div class="has-submenu cursor-pointer" data-target="sub-astronomy">
                 <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
                     <span>🚀 Astronomy & Space</span><span class="arrow">›</span>
@@ -148,9 +161,10 @@
                 <a href="#" class="block p-2 hover:text-white">Astrobiology</a>
                 <a href="#" class="block p-2 hover:text-white">Astronomy</a>
                 <a href="#" class="block p-2 hover:text-white">Planetary Sciences</a>
-                <a href="#" class="block p-2 hover:text-white">Space Exploration</a>
+                                <a href="#" class="block p-2 hover:text-white">Space Exploration</a>
             </div>
 
+            <!-- Earth (Bild 6) -->
             <div class="has-submenu cursor-pointer" data-target="sub-earth">
                 <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
                     <span>🌍 Earth</span><span class="arrow">›</span>
@@ -161,7 +175,6 @@
                 <a href="#" class="block p-2 hover:text-white">Earth Sciences</a>
                 <a href="#" class="block p-2 hover:text-white">Environment</a>
             </div>
-
 
             <!-- Chemistry (Bild 5) -->
             <div class="has-submenu cursor-pointer" data-target="sub-chemistry">
@@ -253,30 +266,7 @@
         </div>
     </div>
 
-    <!-- Interne Struktur-Logik für Initialaufrufe -->
-    <script>
-        const system = {
-            auth: () => {
-                const modal = document.getElementById('account-modal');
-                const dash = document.getElementById('dashboard');
-                if(modal) modal.classList.add('hidden');
-                if(dash) dash.classList.remove('hidden');
-                system.renderTopics();
-            },
-            renderTopics: () => {
-                const topics = ["Nanotechnology", "Physics", "Astronomy & Space", "Earth", "Chemistry", "Biology"];
-                const container = document.getElementById('topic-list');
-                if (!container) return;
-                container.innerHTML = ''; 
-                topics.forEach(t => {
-                    container.innerHTML += `<div class="flex items-center gap-2"><input type="checkbox" checked class="accent-orange-500"> <span>${t}</span></div>`;
-                });
-            },
-            saveTopics: () => {
-                alert("Settings persistent locked via Local/Global Anchor!");
-            }
-        };
-    </script>
+    <!-- Einbindung der externen Logikdatei -->
     <script src="app.js"></script>
 </body>
 </html>
