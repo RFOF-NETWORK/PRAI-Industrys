@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@RFOF-NETWORK - Science X Integration</title>
-    <script src="https://tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cloudflare.com">
     <style>
         body { background-color: #0f172a; color: #f8fafc; font-family: 'Segoe UI', sans-serif; }
@@ -21,10 +21,10 @@
 
     <!-- Navigations-Trigger -->
     <div class="max-w-md mx-auto mb-4 flex justify-between items-center">
-        <button onclick="system.toggleMenu(true)" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition">
+        <button id="menu-toggle-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition cursor-pointer">
             ☰ Menu
         </button>
-        <button id="profile-toggle-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition">
+        <button id="profile-toggle-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition cursor-pointer">
             👤 Account
         </button>
         <span class="text-xs text-slate-500 font-mono">v1.0.0-telnet-ready</span>
@@ -33,20 +33,20 @@
     <div id="app" class="max-w-md mx-auto relative z-10">
         <h1 class="text-2xl font-bold mb-6 text-blue-400">🦅 Golden Phoenix / Science X</h1>
         
-        <!-- Auth Modal UI -->
+        <!-- Auth Modal UI (Isoliertes Account-Fenster) -->
         <div id="account-modal" class="glass p-6 relative">
-            <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl">×</button>
+            <button id="modal-close-btn" class="absolute top-4 right-4 text-slate-400 hover:text-white text-xl cursor-pointer">×</button>
             <h2 class="text-xl mb-4 font-semibold text-center">Science X Account</h2>
             
             <form id="login-form">
                 <div class="relative mb-3">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">@</span>
-                    <input type="email" id="email" placeholder="Email" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
+                    <input type="email" id="login-email" placeholder="Email" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
                 </div>
                 
                 <div class="relative mb-4">
                     <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">🔒</span>
-                    <input type="password" id="password" placeholder="Password" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
+                    <input type="password" id="login-password" placeholder="Password" required class="w-full bg-slate-900 border border-slate-700 p-3 pl-8 rounded text-white focus:outline-none focus:border-blue-500">
                 </div>
 
                 <button type="submit" class="auth-btn bg-slate-700 hover:bg-slate-600 text-white">Sign in</button>
@@ -64,10 +64,10 @@
                 <i class="fab fa-apple"></i> Sign in with Apple
             </button>
 
-            <!-- Web3 Krypto-Erweiterung für EVM & BTC (Telnet Ready) -->
+            <!-- Web3 Krypto-Schnittstellen (Synchronisiert mit app.js) -->
             <div class="mt-4 pt-4 border-t border-slate-700 grid grid-cols-2 gap-2">
-                <button id="btn-wallet-evm" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-purple-600 to-indigo-600 text-white">Connect EVM</button>
-                <button id="btn-wallet-btc" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-amber-600 to-orange-600 text-white">BTC Telnet</button>
+                <button id="btn-wallet-evm" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-purple-600 to-indigo-600 text-white cursor-pointer">Connect EVM</button>
+                <button id="btn-wallet-btc" class="p-2 text-xs font-bold rounded bg-gradient-to-r from-amber-600 to-orange-600 text-white cursor-pointer">BTC Telnet</button>
             </div>
 
             <div class="text-center mt-4 text-xs text-slate-400">
@@ -76,13 +76,13 @@
             </div>
         </div>
 
-        <!-- Dashboard Bereich (Wird nach Login entsperrt) -->
+        <!-- Dashboard Bereich (Wird nach system.auth() freigeschaltet) -->
         <div id="dashboard" class="hidden">
-            <!-- Wissenschafts-Register Menü-Struktur (Direkt integriert) -->
+            <!-- Wissenschafts-Register Menü-Anzeige -->
             <div id="science-x-nav" class="glass p-4 mb-6">
                 <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
                     <h3 class="text-sm font-bold text-blue-400 uppercase">Wissenschafts-Register</h3>
-                    <button onclick="system.toggleMenu(true)" class="text-slate-400 hover:text-white">☰ Open Full Menu</button>
+                    <button onclick="window.system.toggleMenu(true)" class="text-slate-400 hover:text-white cursor-pointer">☰ Open Full Menu</button>
                 </div>
             </div>
             
@@ -90,166 +90,164 @@
                 <h3 class="text-lg font-bold text-orange-500 uppercase">Topic Settings</h3>
                 <p class="text-xs mb-4">Identify the news topics you want to see.</p>
                 <div id="topic-list" class="space-y-2">
-                    <!-- Checkboxen werden via app.js generiert -->
+                    <!-- Checkboxen werden via app.js injiziert -->
                 </div>
-                <button onclick="system.saveTopics()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 p-2 rounded font-bold text-white transition">Save and exit</button>
+                <button id="btn-save-topics" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 p-2 rounded font-bold text-white transition cursor-pointer">Save and exit</button>
             </div>
             
-            <!-- Persistent Chain Ledger Output -->
+            <!-- Dual Explorer Ledger Chain Live Output -->
             <div class="glass p-4 mb-4">
                 <div class="text-xs font-bold text-slate-400 font-mono mb-2 border-b border-slate-700 pb-1 flex justify-between">
                     <span>📡 DUAL_EXPLORER_LEDGER_STREAM</span>
                     <span class="text-green-400 animate-pulse">● LIVE</span>
                 </div>
                 <div id="chain-output" class="font-mono text-[10px] text-green-500 h-64 overflow-y-auto space-y-1">
-                    System Initialized...
+                    System Chain Initialized...
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- LINKES NAVIGATIONS-DROPDOWN MENÜ (Exakt nach den 10 Bildern designt) -->
-    <div id="sidebar-menu" class="fixed inset-y-0 left-0 w-80 bg-slate-900 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 overflow-y-auto hidden">
+<!-- LINKES SCHWEBENDES DROPDOWN MENÜ (Isoliert, fixed, Layer 50 über der App) -->
+    <div id="sidebar-menu" class="fixed inset-y-0 left-0 w-80 bg-slate-900 border-r border-slate-800 z-50 transform -translate-x-full transition-transform duration-300 overflow-y-auto hidden flex flex-col shadow-2xl">
         <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950">
             <span class="font-bold text-blue-400 font-mono text-sm">@RFOF-MENU</span>
-            <button id="menu-close-btn" class="text-slate-400 hover:text-white text-2xl font-bold px-2">×</button>
+            <button id="menu-close-btn" class="text-slate-400 hover:text-white text-2xl font-bold px-2 cursor-pointer">×</button>
         </div>
 
-        <div class="p-4 border-b border-slate-800">
+        <div class="p-4 border-b border-slate-800 bg-slate-900">
             <input type="text" placeholder="Search" class="w-full bg-slate-950 border border-slate-800 p-2 rounded text-sm text-slate-300 focus:outline-none focus:border-slate-700">
         </div>
 
-        <div class="p-2 space-y-1 text-sm">
-            <!-- Nanotechnology (Bild 9) -->
+        <div class="p-2 space-y-1 text-sm flex-1 bg-slate-900">
+            <!-- Nanotechnology -->
             <div class="has-submenu cursor-pointer" data-target="sub-nanotech">
-                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium text-slate-200">
                     <span>⚙️ Nanotechnology</span><span class="arrow">›</span>
                 </div>
             </div>
-            <div id="sub-nanotech" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                <a href="#" class="block p-2 hover:text-white">Nanotechnology</a>
-                <a href="#" class="block p-2 hover:text-white">Bio & Medicine</a>
-                <a href="#" class="block p-2 hover:text-white">Nanomaterials</a>
-                <a href="#" class="block p-2 hover:text-white">Nanophysics</a>
+            <div id="sub-nanotech" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400 border-l border-slate-800 ml-3">
+                <a href="#" class="block p-2 hover:text-white transition">Nanotechnology</a>
+                <a href="#" class="block p-2 hover:text-white transition">Bio & Medicine</a>
+                <a href="#" class="block p-2 hover:text-white transition">Nanomaterials</a>
+                <a href="#" class="block p-2 hover:text-white transition">Nanophysics</a>
             </div>
 
-            <!-- Physics (Bild 8) -->
+            <!-- Physics -->
             <div class="has-submenu cursor-pointer" data-target="sub-physics">
-                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium text-slate-200">
                     <span>⚛️ Physics</span><span class="arrow">›</span>
                 </div>
             </div>
-            <div id="sub-physics" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                <a href="#" class="block p-2 hover:text-white">Physics</a>
-                <a href="#" class="block p-2 hover:text-white">Condensed Matter</a>
-                <a href="#" class="block p-2 hover:text-white">General Physics</a>
-                <a href="#" class="block p-2 hover:text-white">Optics & Photonics</a>
-                <a href="#" class="block p-2 hover:text-white">Plasma Physics</a>
-                <a href="#" class="block p-2 hover:text-white">Quantum Physics</a>
-                <a href="#" class="block p-2 hover:text-white">Soft Matter</a>
-                <a href="#" class="block p-2 hover:text-white">Superconductivity</a>
+            <div id="sub-physics" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400 border-l border-slate-800 ml-3">
+                <a href="#" class="block p-2 hover:text-white transition">Physics</a>
+                <a href="#" class="block p-2 hover:text-white transition">Condensed Matter</a>
+                <a href="#" class="block p-2 hover:text-white transition">General Physics</a>
+                <a href="#" class="block p-2 hover:text-white transition">Optics & Photonics</a>
+                <a href="#" class="block p-2 hover:text-white transition">Plasma Physics</a>
+                <a href="#" class="block p-2 hover:text-white transition">Quantum Physics</a>
+                <a href="#" class="block p-2 hover:text-white transition">Soft Matter</a>
+                <a href="#" class="block p-2 hover:text-white transition">Superconductivity</a>
             </div>
 
-            <!-- Astronomy & Space (Bild 7) -->
+            <!-- Astronomy & Space -->
             <div class="has-submenu cursor-pointer" data-target="sub-astronomy">
-                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium text-slate-200">
                     <span>🚀 Astronomy & Space</span><span class="arrow">›</span>
                 </div>
             </div>
-            <div id="sub-astronomy" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                <a href="#" class="block p-2 hover:text-white">Astronomy & Space</a>
-                <a href="#" class="block p-2 hover:text-white">Astrobiology</a>
-                <a href="#" class="block p-2 hover:text-white">Astronomy</a>
-                <a href="#" class="block p-2 hover:text-white">Planetary Sciences</a>
-                                <a href="#" class="block p-2 hover:text-white">Space Exploration</a>
+            <div id="sub-astronomy" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400 border-l border-slate-800 ml-3">
+                <a href="#" class="block p-2 hover:text-white transition">Astronomy & Space</a>
+                <a href="#" class="block p-2 hover:text-white transition">Astrobiology</a>
+                <a href="#" class="block p-2 hover:text-white transition">Astronomy</a>
+                <a href="#" class="block p-2 hover:text-white transition">Planetary Sciences</a>
+                <a href="#" class="block p-2 hover:text-white transition">Space Exploration</a>
             </div>
 
-            <!-- Earth (Bild 6) -->
+            <!-- Earth -->
             <div class="has-submenu cursor-pointer" data-target="sub-earth">
-                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium text-slate-200">
                     <span>🌍 Earth</span><span class="arrow">›</span>
                 </div>
             </div>
-            <div id="sub-earth" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                <a href="#" class="block p-2 hover:text-white">Earth</a>
-                <a href="#" class="block p-2 hover:text-white">Earth Sciences</a>
-                <a href="#" class="block p-2 hover:text-white">Environment</a>
+            <div id="sub-earth" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400 border-l border-slate-800 ml-3">
+                <a href="#" class="block p-2 hover:text-white transition">Earth</a>
+                <a href="#" class="block p-2 hover:text-white transition">Earth Sciences</a>
+                <a href="#" class="block p-2 hover:text-white transition">Environment</a>
             </div>
 
-            <!-- Chemistry (Bild 5) -->
+            <!-- Chemistry -->
             <div class="has-submenu cursor-pointer" data-target="sub-chemistry">
-                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium text-slate-200">
                     <span>🧪 Chemistry</span><span class="arrow">›</span>
                 </div>
             </div>
-            <div id="sub-chemistry" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                <a href="#" class="block p-2 hover:text-white">Chemistry</a>
-                <a href="#" class="block p-2 hover:text-white">Analytical Chemistry</a>
-                <a href="#" class="block p-2 hover:text-white">Biochemistry</a>
-                <a href="#" class="block p-2 hover:text-white">Materials Science</a>
-                <a href="#" class="block p-2 hover:text-white">Other</a>
-                <a href="#" class="block p-2 hover:text-white">Polymers</a>
+            <div id="sub-chemistry" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400 border-l border-slate-800 ml-3">
+                <a href="#" class="block p-2 hover:text-white transition">Chemistry</a>
+                <a href="#" class="block p-2 hover:text-white transition">Analytical Chemistry</a>
+                <a href="#" class="block p-2 hover:text-white transition">Biochemistry</a>
+                <a href="#" class="block p-2 hover:text-white transition">Materials Science</a>
+                <a href="#" class="block p-2 hover:text-white transition">Other</a>
+                <a href="#" class="block p-2 hover:text-white transition">Polymers</a>
             </div>
 
-            <!-- Biology (Bild 4) -->
+            <!-- Biology -->
             <div class="has-submenu cursor-pointer" data-target="sub-biology">
-                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium text-slate-200">
                     <span>🧬 Biology</span><span class="arrow">›</span>
                 </div>
             </div>
-            <div id="sub-biology" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                <a href="#" class="block p-2 hover:text-white">Biology</a>
-                <a href="#" class="block p-2 hover:text-white">Agriculture</a>
-                <a href="#" class="block p-2 hover:text-white">Biotechnology</a>
-                <a href="#" class="block p-2 hover:text-white">Cell & Microbiology</a>
-                <a href="#" class="block p-2 hover:text-white">Ecology</a>
-                <a href="#" class="block p-2 hover:text-white">Evolution</a>
-                <a href="#" class="block p-2 hover:text-white">Molecular & Computational biology</a>
-                <a href="#" class="block p-2 hover:text-white">Other</a>
-                <a href="#" class="block p-2 hover:text-white">Paleontology & Fossils</a>
-                <a href="#" class="block p-2 hover:text-white">Plants & Animals</a>
-                <a href="#" class="block p-2 hover:text-white">Veterinary medicine</a>
+            <div id="sub-biology" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400 border-l border-slate-800 ml-3">
+                <a href="#" class="block p-2 hover:text-white transition">Biology</a>
+                <a href="#" class="block p-2 hover:text-white transition">Agriculture</a>
+                <a href="#" class="block p-2 hover:text-white transition">Biotechnology</a>
+                <a href="#" class="block p-2 hover:text-white transition">Cell & Microbiology</a>
+                <a href="#" class="block p-2 hover:text-white transition">Ecology</a>
+                <a href="#" class="block p-2 hover:text-white transition">Evolution</a>
+                <a href="#" class="block p-2 hover:text-white transition">Molecular & Computational biology</a>
+                <a href="#" class="block p-2 hover:text-white transition">Other</a>
+                <a href="#" class="block p-2 hover:text-white transition">Paleontology & Fossils</a>
+                <a href="#" class="block p-2 hover:text-white transition">Plants & Animals</a>
+                <a href="#" class="block p-2 hover:text-white transition">Veterinary medicine</a>
             </div>
 
-            <!-- Other Sciences (Bild 2 & 3) -->
+            <!-- Other Sciences -->
             <div class="has-submenu cursor-pointer" data-target="sub-other">
-                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium">
+                <div class="w-full flex justify-between p-3 rounded hover:bg-slate-800 font-medium text-slate-200">
                     <span>📚 Other Sciences</span><span class="arrow">›</span>
                 </div>
             </div>
-            <div id="sub-other" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400">
-                <a href="#" class="block p-2 hover:text-white">Other Sciences</a>
-                <a href="#" class="block p-2 hover:text-white">Archaeology</a>
-                <a href="#" class="block p-2 hover:text-white">Economics & Business</a>
-                <a href="#" class="block p-2 hover:text-white">Education</a>
-                <a href="#" class="block p-2 hover:text-white">Mathematics</a>
-                <a href="#" class="block p-2 hover:text-white">Other</a>
-                <a href="#" class="block p-2 hover:text-white">Political science</a>
-                <a href="#" class="block p-2 hover:text-white">Social Sciences</a>
+            <div id="sub-other" class="hidden pl-6 bg-slate-950/50 py-1 space-y-1 text-slate-400 border-l border-slate-800 ml-3">
+                <a href="#" class="block p-2 hover:text-white transition">Other Sciences</a>
+                <a href="#" class="block p-2 hover:text-white transition">Archaeology</a>
+                <a href="#" class="block p-2 hover:text-white transition">Economics & Business</a>
+                <a href="#" class="block p-2 hover:text-white transition">Education</a>
+                <a href="#" class="block p-2 hover:text-white transition">Mathematics</a>
+                <a href="#" class="block p-2 hover:text-white transition">Other</a>
+                <a href="#" class="block p-2 hover:text-white transition">Political science</a>
+                <a href="#" class="block p-2 hover:text-white transition">Social Sciences</a>
             </div>
         </div>
 
-        <!-- Utilities & Footer Settings (Bild 2) -->
-        <div class="p-4 border-t border-slate-800 mt-4 space-y-4 text-sm">
+        <!-- Footer Settings -->
+        <div class="p-4 border-t border-slate-800 mt-auto space-y-4 text-sm bg-slate-900">
             <div class="flex justify-between items-center text-slate-300 cursor-pointer hover:text-white">
                 <span>⭐ Favourites</span>
             </div>
-            
             <div class="flex justify-between items-center text-slate-300">
                 <span>🔔 Notifications</span>
                 <input type="checkbox" checked class="w-4 h-4 accent-blue-500">
             </div>
-
             <div class="flex justify-between items-center text-slate-300">
                 <span>🌙 Dark mode</span>
                 <input type="checkbox" id="toggle-darkmode" checked class="w-4 h-4 accent-blue-500">
             </div>
-
-            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-2.5 rounded-lg text-xs transition">
+            <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold p-2.5 rounded-lg text-xs transition cursor-pointer">
                 Subscribe to Newsletter
             </button>
-
-            <!-- Social Media Verknüpfungen (Bild 2) -->
+           </div>
+        </div>
+    
             <div class="flex justify-between text-slate-500 pt-2 text-base">
                 <a href="#" class="hover:text-white"><i class="fab fa-facebook"></i></a>
                 <a href="#" class="hover:text-white"><i class="fab fa-linkedin"></i></a>
@@ -266,7 +264,7 @@
         </div>
     </div>
 
-    <!-- Einbindung der externen Logikdatei -->
+    <!-- Brücke zum fertigen Logik-Skript -->
     <script src="app.js"></script>
 </body>
 </html>
