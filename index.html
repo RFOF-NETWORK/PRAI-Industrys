@@ -269,25 +269,7 @@
 
     <!-- Brücke zum fertigen Logik-Skript -->
     <script src="app.js"></script>
-    <script>
-    // Logik für den Wechsel zwischen Login und Sign-up
-    document.getElementById('toggle-auth-mode').addEventListener('click', function() {
-        const title = document.getElementById('modal-title');
-        const btn = document.getElementById('submit-btn');
-        const toggleText = document.getElementById('toggle-text');
-        
-        if (title.innerText === "Science X Login") {
-            title.innerText = "Science X Sign up";
-            btn.innerText = "Sign up";
-            toggleText.innerText = "Already a member?";
-            this.innerText = "Sign in";
-        } else {
-            title.innerText = "Science X Login";
-            btn.innerText = "Sign in";
-            toggleText.innerText = "Not a member?";
-            this.innerText = "Sign up";
-        }
-    });
+
 </script>
 </body>
 </html>
